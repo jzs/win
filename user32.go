@@ -1277,6 +1277,11 @@ type MONITORINFO struct {
 	DwFlags   uint32
 }
 
+type LASTINPUTINFO struct {
+	CbSize uint32
+	DwTime uint32
+}
+
 type (
 	HACCEL    HANDLE
 	HCURSOR   HANDLE
@@ -1588,6 +1593,7 @@ var (
 	getFocus                   uintptr
 	getForegroundWindow        uintptr
 	getKeyState                uintptr
+	getLastInputInfo           uintptr
 	getMenuInfo                uintptr
 	getMessage                 uintptr
 	getMonitorInfo             uintptr
@@ -1710,6 +1716,7 @@ func init() {
 	getFocus = MustGetProcAddress(libuser32, "GetFocus")
 	getForegroundWindow = MustGetProcAddress(libuser32, "GetForegroundWindow")
 	getKeyState = MustGetProcAddress(libuser32, "GetKeyState")
+	getLastInputInfo = MustGetProcAddress(libuser32, "GetLastInputInfo")
 	getMenuInfo = MustGetProcAddress(libuser32, "GetMenuInfo")
 	getMessage = MustGetProcAddress(libuser32, "GetMessageW")
 	getMonitorInfo = MustGetProcAddress(libuser32, "GetMonitorInfoW")
@@ -2210,6 +2217,15 @@ func GetKeyState(nVirtKey int32) int16 {
 		0)
 
 	return int16(ret)
+}
+
+func GetLastInputInfo(plii *LASTINPUTINFO) bool {
+	ret, _, _ := syscall.Syscall(getLastInputInfo, 1,
+		uintptr(unsafe.Pointer(plii)),
+		0,
+		0,
+	)
+	return ret != 0
 }
 
 func GetMenuInfo(hmenu HMENU, lpcmi *MENUINFO) bool {
